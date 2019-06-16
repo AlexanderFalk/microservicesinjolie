@@ -1,0 +1,4 @@
+Når en besked bliver sendt til calculator, skal den parallelt udføre en SLA, som holder styr på tiden det tager at eksekvere. 
+
+
+Eller omfavn det eksekverende kode i SLA? Hmm
