@@ -1,7 +1,7 @@
 include "console.iol"
 include "calculator.iol"
 include "operations.iol"
-include "config.iol"
+include "../config.iol"
 
 
 execution { concurrent }
@@ -11,11 +11,13 @@ embedded {Jolie: "operations.ol" in Operations}
 
 inputPort Calculator {
     Location: Calculator_Location
+    //Protocol: http
     Interfaces: CalculatorInterface
 }
 
+
 init {
-    println@Console("Service Started")()
+    println@Console("Calculator Service Started")()
 }
 
 main {
@@ -28,7 +30,7 @@ main {
         else if(request.operator == "/") div@Operations( values )( response )
         else if(request.operator == "-") {
             if( values.y == 0 ) {
-                statusCode = 422;
+                //statusCode = 422;
                 throw( ZeroDivisionError, "You can't divide with 0. Try again")
             };
             sub@Operations( values )( response ) 
@@ -36,5 +38,5 @@ main {
         else {
             println@Console("Please enter numbers...")()
         }
-    }]
+    }] { nullProcess }
 }

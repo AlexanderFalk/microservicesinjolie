@@ -9,24 +9,24 @@ inputPort Operations {
 }
 
 define logOperation {
-    println@Console(request.x + " " + _op + " " + request.y + " = " + response.result)()
+    println@Console(request.x + " " + _op + " " + request.y + " = " + response)()
 }
 
 main{
     [ sum( request )( response ) {
-        response.result = request.x + request.y
+        response = request.x + request.y
         _op = "+"; logOperation
     }]
     [ mul( request )( response ) {
-        response.result = request.x * request.y
+        response = request.x * request.y
         _op = "*"; logOperation
     }]
     [ div( request )( response ) {
-        response.result = request.x / request.y
+        response = request.x / request.y
         _op = "/"; logOperation
     }]
     [ sub( request )( response ) {
-        response.result = request.x - request.y
+        response = request.x - request.y
         _op = "-"; logOperation
     }]
 }

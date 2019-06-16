@@ -3,16 +3,16 @@ type OperationType: void {
     .y: double
 }
 
-type RequestType: void {
+type CalculatorRequestType: void {
     .values: OperationType
     .operator: string
 }
 
-type ResponseType: void {
-    .result: double
-}
+//type CalculatorResponseType: void {
+//    .result: double
+//}
 
 interface CalculatorInterface {
     RequestResponse:
-        calculator( RequestType ) ( ResponseType ) throws ZeroDivisionError ( string )
+        calculator( CalculatorRequestType ) ( double ) throws ZeroDivisionError ( string )
 }

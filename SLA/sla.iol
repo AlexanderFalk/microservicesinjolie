@@ -1,13 +1,11 @@
-type RequestType: void {
-    .values: OperationType
-    .operator: string
-}
-type ResponseType: void {
+//include "../Calculator/calculator.iol"
+
+type SLAResponseType: void {
     .result: double
     .servicelevel: double
 }
 
 interface ServiceLevelInterface {
-    RequestResponse:
-        timeToRespond( RequestType )( ResponseType )
+    OneWay:
+        calculate( SLAResponseType )
 }
