@@ -5,7 +5,11 @@ type SLAResponseType: void {
     .servicelevel: double
 }
 
-interface ServiceLevelInterface {
-    OneWay:
-        calculate( SLAResponseType )
+interface extender ProxyInterface_Extender {
+	OneWay: *( AuthResponseType ) throws TypeMismatch( string )
 }
+
+//interface ServiceLevelInterface {
+//    OneWay:
+//        calculate( SLAResponseType )
+//}

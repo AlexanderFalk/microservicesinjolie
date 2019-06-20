@@ -27,8 +27,9 @@ courier SLA {
         getCurrentTimeMillis@Time(void)(start);
         forward( request )( response );
         getCurrentTimeMillis@Time(void)(stop);
-        println@Console(stop - start + "ms")();
-        calculate@SLA( {.result = response; .servicelevel = double(stop - start)} )
+        with( response ) { .servicelevel << double(stop - start) }
+        
+        //calculate@SLA( {.result = response; .servicelevel = } )
     } 
 }
 
@@ -39,14 +40,5 @@ init
 }
 
 main {
-    [calculate( sla )] {
-        sla.result = response; 
-        sla.servicelevel = double(stop - start)
-    }
-    //[calculate( slaresponse )] {
-    //   println@Console( "Done" )()
-        //calculator@Calculator( request )( response );
-        //slaresponse.result = response;
-        //slaresponse.servicelevel = 22.0
-    //}
+    in()
 }
