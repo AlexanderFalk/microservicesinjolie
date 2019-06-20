@@ -5,6 +5,10 @@ type SLAResponseType: void {
     .servicelevel: double
 }
 
+interface extender ServiceLevelInterface_extender {
+    OneWay: *( SLAResponseType )
+}
+
 interface ServiceLevelInterface {
     OneWay:
         calculate( SLAResponseType )

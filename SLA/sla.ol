@@ -13,7 +13,7 @@ inputPort SLA {
     Location: ServiceLevel_Location
     Protocol: http { .statusCode -> statusCode}
     Interfaces: ServiceLevelInterface
-    Aggregates: Calculator
+    Aggregates: Calculator with ServiceLevelInterface_extender
 }
 
 outputPort SLA {
@@ -27,8 +27,10 @@ courier SLA {
         getCurrentTimeMillis@Time(void)(start);
         forward( request )( response );
         getCurrentTimeMillis@Time(void)(stop);
-        println@Console(stop - start + "ms")();
-        calculate@SLA( {.result = response; .servicelevel = double(stop - start)} )
+        totaltime = stop - start;
+        with ( response ) { .servicelevel << totaltime}
+        println@Console(stop - start + "ms")()
+        //calculate@SLA( {.result = response; .servicelevel = double(stop - start)} )
     } 
 }
 
