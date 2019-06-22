@@ -8,11 +8,11 @@ type CalculatorRequestType: void {
     .operator: string
 }
 
-//type CalculatorResponseType: void {
-//    .result: double
-//}
+type CalculatorResponseType: void {
+   .result: double
+}
 
 interface CalculatorInterface {
     RequestResponse:
-        calculator( CalculatorRequestType ) ( double ) throws ZeroDivisionError ( string )
+        calculator( CalculatorRequestType ) ( CalculatorResponseType ) throws ZeroDivisionError ( string )
 }

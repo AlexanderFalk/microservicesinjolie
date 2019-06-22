@@ -1,15 +1,27 @@
-//include "../Calculator/calculator.iol"
-
 type SLAResponseType: void {
-    .result: double
-    .servicelevel: double
+    .servicelevelagreement*: void {
+        .objectives: void {
+            responsetime*: double // Only valuable at a specific call
+            avgresponsetime*: double
+            breaches*: int
+        }
+    }
+}
+
+type SLAReportResponseType: void {
+    .servicelevelagreement*: void {
+        .objectives: void {
+            avgresponsetime*: double
+            breaches*: int
+        }
+    }
 }
 
 interface extender ServiceLevelInterface_extender {
-    OneWay: *( SLAResponseType )
+    RequestResponse: *( void )( SLAResponseType ) throws NoSLA ( string )
 }
 
 interface ServiceLevelInterface {
-    OneWay:
-        calculate( SLAResponseType )
+    RequestResponse:
+        slareporting( void )( SLAReportResponseType )
 }
