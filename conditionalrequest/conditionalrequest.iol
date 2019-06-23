@@ -1,9 +1,12 @@
+type CondReqRequestType {
+    .lastModified?: string
+}
 type CondReqResponseType{
-    .isdatanew: string
+    .isdatanew?: string
 }
 
 interface extender ConditionalRequestInterface_Extender {
-    RequestResponse: *( void )( CondReqResponseType ) throws NoResponse ( string )
+    RequestResponse: *( CondReqRequestType )( CondReqResponseType ) throws NoResponse ( string )
 }
 
 interface ConditionalRequestInterface {
