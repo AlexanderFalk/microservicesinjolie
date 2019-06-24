@@ -3,14 +3,14 @@ type OperationType: void {
     .y: double
 }
 
-//type ResponseType: void {
-//    .result: double
-//}
+type ResponseType: void {
+    .result: double
+}
 
 interface OperationsInterface {
         RequestResponse:
-            sum( OperationType )( double ),
-            mul( OperationType )( double ),
-            div( OperationType )( double ),
-            sub( OperationType )( double )
+            sum( OperationType )( ResponseType ),
+            mul( OperationType )( ResponseType ),
+            div( OperationType )( ResponseType ),
+            sub( OperationType )( ResponseType )
 }

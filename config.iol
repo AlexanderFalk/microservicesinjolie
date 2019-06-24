@@ -1,4 +1,5 @@
 constants {
     Calculator_Location = "local",
-    ServiceLevel_Location = "socket://localhost:9001"
+    ServiceLevelAgreement_Location = "socket://localhost:9001",
+    ConditionalRequest_Location = "socket://localhost:9002"
 }
