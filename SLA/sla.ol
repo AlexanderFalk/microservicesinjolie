@@ -4,7 +4,7 @@ include "../Calculator/calculator.iol"
 include "time.iol"
 include "../config.iol"
 
-execution { sequential }
+execution { concurrent }
 
 outputPort Calculator {Interfaces: CalculatorInterface}
 embedded {Jolie: "../Calculator/calculator.ol" in Calculator}
@@ -27,6 +27,8 @@ courier SLA {
         getCurrentTimeMillis@Time(void)(start);
         forward( request )( response );
         getCurrentTimeMillis@Time(void)(stop);
+        .servicelevel << double(stop - start
+        response << 
         with( response ) { .servicelevel << double(stop - start) }
         
         //calculate@SLA( {.result = response; .servicelevel = } )
