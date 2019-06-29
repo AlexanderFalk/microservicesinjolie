@@ -1,6 +1,6 @@
 include "console.iol"
 include "sla.iol"
-include "../Calculator/calculator.iol"
+include "../calculator/calculator.iol"
 include "time.iol"
 include "../config.iol"
 

@@ -9,7 +9,7 @@ type CalculatorRequestType: void {
 }
 
 type CalculatorResponseType: void {
-   .result: double
+   .result?: double
 }
 
 interface CalculatorInterface {

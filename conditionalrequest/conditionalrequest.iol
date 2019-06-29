@@ -1,8 +1,8 @@
-type CondReqRequestType {
+type CondReqRequestType: void {
     .lastModified?: string
 }
-type CondReqResponseType{
-    .isdatanew?: string
+type CondReqResponseType: void{
+    .msg?: string
 }
 
 interface extender ConditionalRequestInterface_Extender {

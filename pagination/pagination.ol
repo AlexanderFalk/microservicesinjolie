@@ -5,11 +5,11 @@ include "json_utils.iol"
 //include "message_digest.iol"
 //include "converter.iol"
 include "../config.iol"
-include "../calculator/calculator.iol"
+include "../pagination/calculator.iol"
 
 execution { concurrent }
 
-outputPort Calculator {Interfaces: CalculatorInterface}
+outputPort Datachunk {Interfaces: CalculatorInterface}
 embedded {Jolie: "../Calculator/calculator.ol" in Calculator}
 
 inputPort ConditionalRequest {
