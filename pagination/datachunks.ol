@@ -1,6 +1,6 @@
+include "console.iol"
 include "datachunks.iol"
 include "../config.iol"
-include "math.iol"
 
 execution { concurrent }
 
@@ -10,6 +10,7 @@ inputPort DataChunk {
 }
 
 init {
+    println@Console( "Datachunk Service has started!" )();
     [datachunk( void )( response ) {
         for ( i = 0, i < 1000, i++ ) {
             response.data[i].chunk = new

@@ -12,6 +12,6 @@ interface extender PaginationInterface_Extender {
 }
 
 interface PaginationInterface {
-    OneWay:
-        conditionalrequest( CondReqResponseType )
+    RequestResponse:
+        pagination( PaginationRequestType )( PaginationResponseType ) throws NoResponse ( string )
 }

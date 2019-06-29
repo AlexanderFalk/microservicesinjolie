@@ -5,6 +5,6 @@ type DataChunkResponseType: void {
 }
 
 interface DataChunkInterface {
-    Request-Response:
+    RequestResponse:
         datachunk( void )( DataChunkResponseType ) throws NoDataAvailable( string )
 }
