@@ -1,5 +1,5 @@
 type DataChunkResponseType: void {
-    .data: void {
+    .data*: void {
         .chunk: string
     }
 }

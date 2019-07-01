@@ -11,17 +11,14 @@ inputPort DataChunk {
 
 init {
     println@Console( "Datachunk Service has started!" )();
-    [datachunk( void )( response ) {
-        for ( i = 0, i < 1000, i++ ) {
-            response.data[i].chunk = new
-        }
-    }]
+    for ( i = 0, i < 1000, i++ ) {
+        global.data[i].chunk = new
+    };
+    println@Console( "Datachunk Service init has ended!" )()
 }
 
 main {
     [datachunk( void )( response ) {
-        for ( i = 0, i < 1000, i++ ) {
-            println@Console( response.data[i].chunk )()
-        }
+        response.data << global.data
     }]
 }
