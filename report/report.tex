@@ -136,8 +136,8 @@ It is assumed the reader is somewhat familiar with the concepts of Jolie Languag
 \newpage
 
 \section{Introduction}
-Design Patterns are philosophy jargon for good practices within software development. The patterns mirrors reoccurring issues in real-world scenarios and tries to accomodate software developers reinventing the wheel. Through experience you build a repertoire of principles in the creation of software. These principles are called patterns \cite{Applying_Patterns}, which describes a problem with a solution attached, making it applicable in various contexts. A pattern advises -- and considers -- the forces and trade-offs for the solution. Design Patterns gained popularity after the release of the book "Design Patterns: Elements of Reusable Object\-Oriented Software" \cite{DesignPGoF}, written by the Gang-of-Four (referral to the four authors), which gave the insight into reusable templates for problems. Microservice API Patterns are an extensions to Design Patterns, primarily focusing on the communication between a client and a microservice. Lowering bandwidth, service agreements, structure, and API qualities, are some focus areas. \\
-This paper focus\' on three API patterns \cite{MAPIPweb}: 
+Design Patterns are philosophy jargon for good practices within software development. The patterns mirrors reoccurring issues in real-world scenarios and tries to accomodate software developers reinventing the wheel. Through experience you build a repertoire of principles in the creation of software. These principles are called patterns \cite{Applying_Patterns:1}, which describes a problem with a solution attached, making it applicable in various contexts. A pattern advises -- and considers -- the forces and trade-offs for the solution. Design Patterns gained popularity after the release of the book "Design Patterns: Elements of Reusable Object\-Oriented Software" \cite{DesignPGoF:1}, written by the Gang-of-Four (referral to the four authors), which gave the insight into reusable templates for problems. Microservice API Patterns are an extensions to Design Patterns, primarily focusing on the communication between a client and a microservice. Lowering bandwidth, service agreements, structure, and API qualities, are some focus areas. \\
+This paper focus\' on three API patterns \cite{MAPIPweb:1}: 
 
 \begin{itemize}
     \item Service Level Agreement
@@ -145,7 +145,7 @@ This paper focus\' on three API patterns \cite{MAPIPweb}:
     \item Pagination
 \end{itemize}
 
-The patterns are implemented in Jolie \cite{JolieAboutPage}, which is a native microservice programming language, focusing on services, distribution, and reusability. The last two are obtained by design. \\
+The patterns are implemented in Jolie \cite{JolieAboutPage:1}, which is a native microservice programming language, focusing on services, distribution, and reusability. The last two are obtained by design. \\
 The goal is to show the patterns in play with Jolie and the ease of applying them. 
 
 \newpage
@@ -164,7 +164,7 @@ There are five categories --- for now --- of  patterns:
 
 We are not diving into every category. The three chosen patterns are within the Quality and Structural categories. 
 
-In Jolie our examples have the same structure - like a template. There is a main service, providing the requested functionality by the client. It has an inputPort defined, deployed using the local medium \cite{LocalLoc}, using the shared memory for communicating between main service and the pattern serice. The pattern service functions as middleware, sitting infront, and aggregates the interface, of the main service, providing it with the ability of using the courier \cite{Courier} architecture to intercept the request and respond messages between the client and the main service. The pattern service embeds -- \ref{lst:embedService} -- the main service, meaning, when the pattern service starts, it starts the main service as well. 
+In Jolie our examples have the same structure - like a template. There is a main service, providing the requested functionality by the client. It has an inputPort defined, deployed using the local medium \cite{LocalLoc:1}, using the shared memory for communicating between main service and the pattern serice. The pattern service functions as middleware, sitting infront, and aggregates the interface, of the main service, providing it with the ability of using the courier \cite{Courier:1} architecture to intercept the request and respond messages between the client and the main service. The pattern service embeds -- \ref{lst:embedService} -- the main service, meaning, when the pattern service starts, it starts the main service as well. 
 
 \begin{lstlisting}[caption=Embed main service into the pattern service, 
     captionpos=b, language=java, label=embedService, frame=single]
@@ -175,7 +175,7 @@ embedded {Jolie: "<PATH_TO_MAIN_SERVICE>" in MainService}
 The difference in the implementations are how the requests and responds are manipulated in the courier.
 
 \subsection{Quality Pattern: Service Level Agreement}
-A Service Level Agreement (SLA) \cite{SLA} is a contractual binding between a provider and one or more clients. SLA's defines the Quality-of-Service (QoS) \cite{QoS} characteristics through Service Level Objectives, ensuring clients are getting what they are paying for. A single SLA can be described as: Time-To-Respond (TTR). This is the time it takes for -- in our case -- the microservice to respond to requests. If an agreement from the provider was a response time within x seconds, and it breaches for more than y times per month, then a penalty has to be paid to the client. \\
+A Service Level Agreement (SLA) \cite{SLA:1} is a contractual binding between a provider and one or more clients. SLA's defines the Quality-of-Service (QoS) \cite{QoS:1} characteristics through Service Level Objectives, ensuring clients are getting what they are paying for. A single SLA can be described as: Time-To-Respond (TTR). This is the time it takes for -- in our case -- the microservice to respond to requests. If an agreement from the provider was a response time within x seconds, and it breaches for more than y times per month, then a penalty has to be paid to the client. \\
 
 Three SLA's are defined:
 \begin{itemize}
@@ -195,7 +195,7 @@ getCurrentTimeMillis@Time(void)(stop);
 sla_reporting // A function
 \end{lstlisting}
 
-When the timer has stopped, the SLA analytics is calculated \cite{lst:slaOperation}. The values of the SLA's have been defined as global constants. On line 1, we find the difference between start and stop time. On line 2, we are executing a function, which returns the average response time of all stored response times. On line 5 we check whether the response time is not living up to the expectation, and increment the total breaches by 1. On line 9, we are checking the average response time, and on line 16 we are aggregating the SLA values into the response to the client. 
+When the timer has stopped, the SLA analytics is calculated \ref{lst:slaOperation}. The values of the SLA's have been defined as global constants. On line 1, we find the difference between start and stop time. On line 2, we are executing a function, which returns the average response time of all stored response times. On line 5 we check whether the response time is not living up to the expectation, and increment the total breaches by 1. On line 9, we are checking the average response time, and on line 16 we are aggregating the SLA values into the response to the client. 
 
 \begin{lstlisting}[caption=slaOperation, captionpos=b, language=java, label=slaOperation, frame=single]
 objectives.responsetime = double(stop - start);
@@ -218,7 +218,7 @@ with( response ) { .servicelevelagreement.objectives << objectives };
 undef ( objectives )
 \end{lstlisting}
 
-The response is seen in \cite{lst:slaResponse}:
+The response is seen in \ref{lst:slaResponse}:
 
 \begin{lstlisting}[caption=The response to the client when a calculation is requested, 
 captionpos=b, language=json, label=slaResponse]

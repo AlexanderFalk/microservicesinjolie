@@ -29,7 +29,11 @@ inputPort ConditionalRequest {
 courier ConditionalRequest {
     [calculator( request )( response )] {
 
-        if ( is_defined( request.lastModified ) && request.lastModified != "" ) {
+        if ( is_defined( request.lastModified ) ) {
+            if ( request.lastModified != "" ) {
+                getCurrentDateTime@Time( {.format = "dd-MM-yyyy kk:mm:ss"} )( lastModified );
+                forward( request )( response )
+            }
             request.lastModified.format = "dd-MM-yyyy kk:mm:ss";
             // .language not supported when looking into the source code
             getTimestampFromString@Time( request.lastModified )( timestampFromString );
@@ -46,8 +50,6 @@ courier ConditionalRequest {
                 statusCode = 304
                 // "No New Content. Saving Bandwidth";
             }
-        } else {
-            getCurrentDateTime@Time( {.format = "dd-MM-yyyy kk:mm:ss"} )( lastModified )
         }
     }
 }
