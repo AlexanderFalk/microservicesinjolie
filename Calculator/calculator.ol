@@ -11,7 +11,6 @@ embedded {Jolie: "operations.ol" in Operations}
 
 inputPort Calculator {
     Location: Calculator_Location
-    //Protocol: http
     Interfaces: CalculatorInterface
 }
 

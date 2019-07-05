@@ -13,8 +13,7 @@ init {
     println@Console( "Datachunk Service has started!" )();
     for ( i = 0, i < 1000, i++ ) {
         global.data[i].chunk = new
-    };
-    println@Console( "Datachunk Service init has ended!" )()
+    }
 }
 
 main {

@@ -1,10 +1,10 @@
 type PaginationRequestType: void {
-    .limit?: int
-    .offset?: int
-    .page?: int
+    .limit?: int | string
+    .offset?: int | string
+    .page?: int | string 
 }
 type PaginationResponseType: void{
-    .paginationdetails?: PaginationRequestType
+    .paginationdetails: PaginationRequestType
 }
 
 interface extender PaginationInterface_Extender {
