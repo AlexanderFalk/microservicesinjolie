@@ -184,65 +184,81 @@ Three SLA's are defined:
     \item Number of breached response times
 \end{itemize}
 
-The main service used for this example is the Calculator service, which provides the ability to make addition, substraction, multiply, and division. The pattern service is the SLA service, which provides metrics for the performance analytics of the service. When the client sends a request to the calculator service, the SLA service intercepts, starts a timer, and forwards the request. When the request comes back, it stops the timer \ref{lst:courierSLA}, and . 
+The main service used for this example is the Calculator service, which provides the ability to make addition, substraction, multiply, and division. The pattern service is the SLA service, which provides metrics for the performance analytics of the service. When the client sends a request to the calculator service, the SLA service intercepts, starts a timer, and forwards the request. When the request comes back, it stops the timer \ref{lst:courierSLA}, and executes a request against the SLA Storage Service. This service handles everything related to the SLA conditions, functions, and storage. 
 
 \begin{lstlisting}[caption=Courier operations for the SLA service, 
-captionpos=b, language=java, label=courierSLA, frame=single, breaklines=true]
+captionpos=b, label=courierSLA, frame=single, breaklines=true]
 getCurrentTimeMillis@Time(void)(start); // Start Timer
 forward( request )( response );
 getCurrentTimeMillis@Time(void)(stop); // Stop timer
 responsetime = double(stop - start);
-// Call report funt
 buildReport@SLAStorageService( { .responsetime = responsetime } )( reportingResponse );
 response.report << reportingResponse
 \end{lstlisting}
 
-When the timer has stopped, the SLA analytics is calculated \ref{lst:slaOperation}. The values of the SLA's have been defined as global constants. On line 1, we find the difference between start and stop time. On line 2, we are executing a function, which returns the average response time of all stored response times. On line 5 we check whether the response time is not living up to the expectation, and increment the total breaches by 1. On line 9, we are checking the average response time, and on line 16 we are aggregating the SLA values into the response to the client. 
+The SLA Storage Service uses a JSON\-file as basic persistent storage and has three operations are defined:
+\begin{itemize}
+    \item buildReport - analyzes the response time of the calculation done for the client, checks for contractual breaches, and updates the JSON\-file
+    \item getReport - retrieving the information from the JSON\-file and returns the response to the client
+    \item reset - resets the file. Can be useful when shifting month
+\end{itemize}
 
-\begin{lstlisting}[caption=slaOperation, captionpos=b, language=java, label=slaOperation, frame=single]
-objectives.responsetime = double(stop - start);
-calculateTheAvgFailedResponseTime; // A function
-objectives.avgresponsetime = sum; // The sum variable is defined by above executed function
-objectives.breaches = global.number_of_breaches; // Set to 0, when service is initialized
+The "buildReport" operation is called by the SLA Service, which provides the response time as a request parameter. The operation calls a function -- \ref{lst:slaBuildReport} -- providing the logic behind the SLO's. On line 2 it opens and reads the persistent storage file, using the content of the file as a data structure for the lifespan of the function. On line 4 a function is called to calculate the average response time SLO. From line 6-19 it is checking if any SLO has been breached or if everything is fine. From line 20-27 it is updating the persistent storage file with the new information, and lastly returns the response back to the user. 
 
-if ( objectives.responsetime > SERVICE_LEVEL_OBJECTIVE_RESPONSE_TIME ) {
-    global.number_of_breaches++
-    // Response Time has been breached. Increment the global value. 
-} else {
-    if(sum < SERVICE_LEVEL_OBJECTIVE_AVG_RESPONSE_TIME) {
-        // No breaches for response time or the average respones time
+\begin{lstlisting}[caption=Updates persistent storage file and checks for contractual breaches, captionpos=b, label=slaBuildReport, frame=single]
+define build_sla_reporting {
+    readFile@File( { .filename = STORAGE_FILENAME, .format = "json" } )( fileresponse );
+    fileresponse.numberofrequests++;
+    calculateTheAvgFailedResponseTime; // function to calculate the total average response time 
+    fileresponse.avgresponsetime = avgsum
+    if ( request.responsetime > SERVICE_LEVEL_OBJECTIVE_RESPONSE_TIME ) {
+        fileresponse.numberofbreaches++;
+        // Breach of response time SLO
+        if ( TotalNumberOfBreaches >= SERVICE_LEVEL_OBJECTIVE_NUMBER_OF_BREACH_RESPONSE_TIMES ) 
+            // Breach of total number of breaches SLO
     } else {
-        // Average response time breached
-    }
-}
-// Unfold the response data structure and deep copy the values into the tree
-with( response ) { .servicelevelagreement.objectives << objectives };
-undef ( objectives )
-\end{lstlisting}
-
-The response is seen in \ref{lst:slaResponse}:
-
-\begin{lstlisting}[caption=The response to the client when a calculation is requested, 
-captionpos=b, language=json, label=slaResponse]
-"result": 100,
-"servicelevelagreement": [
-    {
-        "objectives": {
-            "breaches": [
-                6
-            ],
-            "responsetime": [
-                3
-            ],
-            "avgresponsetime": [
-                4.375
-            ]
+        // Response time is fine
+        if(fileresponse.avgresponsetime < SERVICE_LEVEL_OBJECTIVE_AVG_RESPONSE_TIME) {
+            // No breach of the average response time
+        } else {
+            fileresponse.numberofbreaches++;
+            // Breach of average response time SLO
         }
     }
-]
+    ...
+    // Construct the response format to the file
+    ...
+    writeFile@File( file )();
+    with( objectives ) {
+        .responsetime = request.responsetime;
+        .avgresponsetime = fileresponse.avgresponsetime;
+        .breaches = fileresponse.numberofbreaches
+    };
+    with( response ) { .servicelevelagreement.objectives << objectives };
+    response.statusCode = 200;
+}
 \end{lstlisting}
 
-By building a "contract" into the microservice, the API provider implementing the SLA pattern establishes transparency between its clients. It can be on the whole API service or specific operations, but it outlines the terms for the client regards to quality. The downside of implementing the SLA pattern in the microservice is: the transparency makes it easier to be held accountable on the quality of the API. Now the agreement is "public" and in some cases you do not want this.
+The response is seen in \ref{lst:slaStorageResponse}:
+
+\begin{lstlisting}[caption=The response to the client when a calculation is requested, 
+captionpos=b, language=json, label=slaStorageResponse]
+{
+    "result": 1305,
+    "report": {
+        "servicelevelagreement": {
+            "objectives": {
+                "breaches": 4,
+                "responsetime": 12,
+                "avgresponsetime": 6
+            }
+        },
+        "statusCode": 200
+    }
+}
+\end{lstlisting}
+
+By building a "contract" into the microservice, the API provider implementing the SLA pattern establishes transparency between its clients. It can be on the whole API service or specific operations, but it outlines the terms for the client regards to quality. The downside of implementing the SLA pattern in the microservice is: the transparency makes it easier to be held accountable on the quality of the API. Now the agreement is "public" and in some cases you do not want this. It has been chosen to move the persistent storage to its own service instead of incomporating it into the SLA Service. The SLA Storage Service is running sequentially, which guarantees every client exclusive access to a resource, and data races can be minimized. By separating the persistent storage logic to its own service we also gain more loose coupling. Since the SLA is bound to the service, we can have a global perspective of the client satisfaction. One problem with this is if two clients are located in two distinct regions, and one client is satisfied, the second is not, but the SLA shows everything being fine. In this case you can apply use the SLA Storage Service and distribute it to be applicable based on regions. If the SLA Service goes down, the SLA Storage Service is not affected, which is important. 
 
 \subsection{Quality Pattern: Conditional Request}
 In some situations you have client requesting the same data over and over again without changes. This increases the processing time server-side but also the bandwidth required to transfer data back and forth. The Conditional Request (CR) pattern tries to accomodate this problem by timestamping client requests and if the request is within a time period, then no data is returned. \\
