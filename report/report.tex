@@ -167,7 +167,7 @@ We are not diving into every category. The three chosen patterns are within the 
 In Jolie our examples have the same structure - like a template. There is a main service, providing the requested functionality by the client. It has an inputPort defined, deployed using the local medium \cite{LocalLoc:1}, using the shared memory for communicating between main service and the pattern serice. The pattern service functions as middleware, sitting infront, and aggregates the interface, of the main service, providing it with the ability of using the courier \cite{Courier:1} architecture to intercept the request and respond messages between the client and the main service. The pattern service embeds -- \ref{lst:embedService} -- the main service, meaning, when the pattern service starts, it starts the main service as well. 
 
 \begin{lstlisting}[caption=Embed main service into the pattern service, 
-    captionpos=b, language=java, label=embedService, frame=single]
+    captionpos=b, language=java, label=embedService, frame=single, breaklines=true, numbers=left]
 outputPort MainService {Interfaces: MainServiceInterface}
 embedded {Jolie: "<PATH_TO_MAIN_SERVICE>" in MainService}
 \end{lstlisting}
@@ -205,7 +205,7 @@ The SLA Storage Service uses a JSON\-file as basic persistent storage and has th
 
 The "buildReport" operation is called by the SLA Service, which provides the response time as a request parameter. The operation calls a function -- \ref{lst:slaBuildReport} -- providing the logic behind the SLO's. On line 2 it opens and reads the persistent storage file, using the content of the file as a data structure for the lifespan of the function. On line 4 a function is called to calculate the average response time SLO. From line 6-19 it is checking if any SLO has been breached or if everything is fine. From line 20-27 it is updating the persistent storage file with the new information, and lastly returns the response back to the user. 
 
-\begin{lstlisting}[caption=Updates persistent storage file and checks for contractual breaches, captionpos=b, label=slaBuildReport, frame=single]
+\begin{lstlisting}[caption=Updates persistent storage file and checks for contractual breaches, captionpos=b, label=slaBuildReport, frame=single, numbers=left]
 define build_sla_reporting {
     readFile@File( { .filename = STORAGE_FILENAME, .format = "json" } )( fileresponse );
     fileresponse.numberofrequests++;
@@ -261,41 +261,94 @@ captionpos=b, language=json, label=slaStorageResponse]
 By building a "contract" into the microservice, the API provider implementing the SLA pattern establishes transparency between its clients. It can be on the whole API service or specific operations, but it outlines the terms for the client regards to quality. The downside of implementing the SLA pattern in the microservice is: the transparency makes it easier to be held accountable on the quality of the API. Now the agreement is "public" and in some cases you do not want this. It has been chosen to move the persistent storage to its own service instead of incomporating it into the SLA Service. The SLA Storage Service is running sequentially, which guarantees every client exclusive access to a resource, and data races can be minimized. By separating the persistent storage logic to its own service we also gain more loose coupling. Since the SLA is bound to the service, we can have a global perspective of the client satisfaction. One problem with this is if two clients are located in two distinct regions, and one client is satisfied, the second is not, but the SLA shows everything being fine. In this case you can apply use the SLA Storage Service and distribute it to be applicable based on regions. If the SLA Service goes down, the SLA Storage Service is not affected, which is important. 
 
 \subsection{Quality Pattern: Conditional Request}
-In some situations you have client requesting the same data over and over again without changes. This increases the processing time server-side but also the bandwidth required to transfer data back and forth. The Conditional Request (CR) pattern tries to accomodate this problem by timestamping client requests and if the request is within a time period, then no data is returned. \\
+In some situations you have clients requesting the same data over and over again without changes. This increases the server-side processing time but also the bandwidth required to transfer data back and forth. The Conditional Request (CR) pattern tries to accomodate this problem by tracking client requests and if the request match a specified condition, then no data is returned. \\
 
-In the Jolie example, we are adding a response header called: "lastModified". When the user creates a request towards the microservice, we respond with this header the first time. It is expected this header is used as a request header at the next request to calculate the difference and return the latest data if necessary. \\
-In the listing \ref{lst:condreqCourier} on line 1 we are checking for existence of the lastModified header. If it is defined but it is empty, we are not making any checks, and assumes the client got no data from earlier. The lastModified header is returned in the response as a header, and it is going to be used for the next request. On line 7-12 we get the lastModified header in the request and current timestamp. On line 14-16 we execute the check if new data is needed for the client, and respond with the new data, otherwise no new data is needed. 
+The Time-Based Conditional Request \cite{CondReqMAPI:1} is the approach chosen for the follow Jolie example, where the response header called: "Last-Modified" is used to show a timestamp, which can be used in subsequent requests. The setup is identical with the SLA example, except the main service is now a DataService microservice, which can respond with a chunk of random data. The first time the user creates a request towards the DataService microservice, we respond with the "Last-Modified" header. It is expected this header is used in the request header called: "If-Modified-Since" \cite{CondReqRFC:1} at the next request to calculate the difference and return the latest data if necessary. \\
+In the listing \ref{lst:condreqCourier} on line 1 we are checking for existence of the "If-Modified-Since" request header. If it is defined, but it is empty, we are not making any checks, assuming the client got no data from earlier, responding with everything, and append the "Last-Modified" response header. From line 8-13 we get the "If-Modified-Since" header in the request, containing the clients current timestamp. On line 15-21 we execute the check if new data is needed for the client, and respond with the new data, otherwise no new data is needed. 
 
 \begin{lstlisting}[caption=Courier operations for the Conditional Request service, 
-    captionpos=b, language=java, label=condreqCourier, frame=single]
-
-if ( is_defined( request.lastModified ) ) {
-    // First time a request comes in
-    if ( request.lastModified != "" ) {
+    captionpos=b, language=java, label=condreqCourier, frame=single, breaklines=true, numbers=left]
+if ( is_defined( request.("If-Modified-Since") ) ) {
+    length@StringUtils(request.("If-Modified-Since"))(headerLength);
+    if ( headerLength <= 0) {
         getCurrentDateTime@Time( {.format = "dd-MM-yyyy kk:mm:ss"} )( lastModified );
         forward( request )( response )
-    }
-    request.lastModified.format = "dd-MM-yyyy kk:mm:ss";
-    getTimestampFromString@Time( request.lastModified )( timestampFromString );
-    timestampFromString = timestampFromString / 1000;
-
-    getCurrentTimeMillis@Time( void )( currentTimestamp );
-    currentTimestamp = currentTimestamp / 1000;
-    // New data is returned
-    if ( (currentTimestamp - timestampFromString) > 300 ) {
-        getCurrentDateTime@Time( {.format = "dd-MM-yyyy kk:mm:ss"} )( lastModified );
-        forward( request )( response )
+        response.statusCode = 200
     } else {
-        statusCode = 304
-        // "No New Content. Saving Bandwidth";
+        request.("If-Modified-Since").format = "dd-MM-yyyy kk:mm:ss";
+        getTimestampFromString@Time( request.("If-Modified-Since") )( timestampFromString );
+        timestampFromString = timestampFromString / 1000;
+        getCurrentTimeMillis@Time( void )( currentTimestamp );
+        currentTimestamp = currentTimestamp / 1000;
+        // New data is returned
+        if ( (currentTimestamp - timestampFromString) > MODIFIED_TIMESTAMP ) {
+            getCurrentDateTime@Time( {.format = "dd-MM-yyyy kk:mm:ss"} )( lastModified );
+            forward( request )( response )
+            response.statusCode = 200
+        } else {
+            response.statusCode = 304 // "No New Content. Saving Bandwidth";
+        }
     }
-} 
+}
 \end{lstlisting}
-    
-Using this pattern we can save bandwidth, which can be crucial in situations where your hosted microservice has a limit on data usage. 
+
+There are other alternatives to be used for the Conditional Request pattern. One of them is called: Fingerprint-Based Conditional Request \cite{CondReqRFC:1}, and is somewhat similiar to TimeBased. Fingerprint-Based generates a tag for the client, where to get this tag you can use a hash function on the response to generate a unique value. The tag becomes the unique value and is returned as a response to the client. From here it can be used as in TimeBased, where the client sends it along the request, and then a check can verify whether the response has changed from the last time. Since the Conditional Request Service for now is tightly coupled with the TimeBased approach, it could be an idea to abstract the checking functionality into a "Condition Service", where the client can specify which approach to use, giving more flexibility, and less coupling.\\
 
 \subsection{Structural Pattern: Pagination}
-The Pagination pattern is  
+In the Conditional Request pattern, we are checking whether it is necessary to respond with all data to renew the client-side. In some situations the client is not interested in getting all data but only a chunk of it. This is where the Pagination pattern \cite{PaginationMAPI:1} comes into the picture. Pagination is about cut-off of data and provide the client freedom to specify what data to retrieve. As in the Conditional Request pattern, we have multiple variants to choose from. In the Jolie example it is the Offset-Based Pagination which has been chosen. In this approach, we have three meta-data values: 
+
+\begin{itemize}
+    \item Offset - The number of documents to skip before start picking documents to return
+    \item Limit - The amount of documents to return
+    \item Page - The total number of documents is broken into pages of a certain size. This specify which page to start on
+\end{itemize}
+
+If the Offset and Limit values have been defined in the request, we start by counting documents from the Offset and until the Limit, and then return the chunk of data as response to the client. If one of them are missing, and Page is defined, we start from the Page times the PAGE_SIZE, which is a constant defined server-side. As an example if Page = 2 is defined, and PAGE_SIZE = 25, our starting index is (Page - 1) * PAGE_SIZE, and end index is PAGE_SIZE * Page. With this approach, we can move to the next page of documents and not interfere with previous documents, avoiding duplications. We show this in \ref{lst:paginationCourier}. From line 3-9, we check whether Offset and Limit are set. If they are, we respond with the documents within their defined ranged. Else from line 11-20, we check whether Page is defined, and proceed with above condition calculation.
+
+\begin{lstlisting}[caption=Courier operations for the Pagination Service, 
+    captionpos=b, language=java, label=paginationCourier, frame=single, breaklines=true, numbers=left]
+forward( void )( newresponse );
+// Store meta-data values
+if ( request.offset != "" && request.limit != "" ) {
+    runUntil = request.offset + request.limit;
+    for ( i = request.offset, i < runUntil, i++ ) {
+        response.data[i-request.offset].chunk = newresponse.data[i].chunk
+    }
+    ...
+    response.statusCode = 200
+} else {
+    if ( request.page != "" ) {
+        runUntil = (PAGE_SIZE * request.page);
+        if (request.page != 1) {
+            request.page = (request.page - 1) * PAGE_SIZE
+        }
+        for ( i = request.page-1, i < runUntil, i++ ) {
+            response.data[i-request.page+1].chunk = newresponse.data[i].chunk
+        }
+        ...
+        response.statusCode = 200
+    }
+}   
+\end{lstlisting}
+
+If we set the Offset to 50 and Limit 50 3, we get the response as in \ref{lst:PaginationResponse}
+
+\begin{lstlisting}[caption=The response to the client based on Offset and Limit meta-data, 
+    captionpos=b, language=json, label=PaginationResponse]
+{
+"paginationdetails": {
+    "offset": 50,
+    "limit": 3
+}, "data": [
+        {"chunk": "438b100f-afcd-4b54-a491-1d1fed677cf4"},
+        {"chunk": "b750e10c-6d4e-4ed5-8fff-1d6ff4092150"},
+        {"chunk": "1b92843e-8340-459e-ade6-88e32a271298"}
+    ],
+    "statusCode": 200
+}
+\end{lstlisting}
+
+
 
 \section{Conclusion}
 

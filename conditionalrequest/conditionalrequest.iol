@@ -1,5 +1,5 @@
 type CondReqRequestType: void {
-    .ifModifiedSince?: string
+    ."If-Modified-Since"?: string
 }
 type CondReqResponseType: void{
     .msg?: string
