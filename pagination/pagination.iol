@@ -4,6 +4,7 @@ type PaginationRequestType: void {
     .page?: int | string 
 }
 type PaginationResponseType: void{
+    .statusCode: int
     .paginationdetails: PaginationRequestType
 }
 

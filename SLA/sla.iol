@@ -1,27 +1,9 @@
-type SLAResponseType: void {
-    .servicelevelagreement*: void {
-        .objectives: void {
-            responsetime*: double // Only valuable at a specific call
-            avgresponsetime*: double
-            breaches*: int
-        }
-    }
-}
+include "slastorageservice.iol"
 
-type SLAReportResponseType: void {
-    .servicelevelagreement*: void {
-        .objectives: void {
-            avgresponsetime*: double
-            breaches*: int
-        }
-    }
+type SLAResponseType: void {
+    .report: SLAStorageResponseType
 }
 
 interface extender ServiceLevelInterface_extender {
     RequestResponse: *( void )( SLAResponseType ) throws NoSLA ( string )
-}
-
-interface ServiceLevelInterface {
-    RequestResponse:
-        slareporting( void )( SLAReportResponseType )
 }

@@ -17,7 +17,6 @@ inputPort PaginationRequest {
             headers.limit = "limit"
             headers.offset = "offset"
             headers.page = "page"
-            statusCode -> statusCode
             format = "json" 
     }
     Interfaces: PaginationInterface
@@ -25,7 +24,7 @@ inputPort PaginationRequest {
 }
 
 courier PaginationRequest {
-    [datachunk( request )( response )] {
+    [interface DataChunkInterface( request )( response )] {
         
         forward( void )( newresponse );
         request.offset = int(request.offset);
@@ -38,19 +37,23 @@ courier PaginationRequest {
             for ( i = request.offset, i < runs, i++ ) {
                 response.data[i-request.offset].chunk = newresponse.data[i].chunk
             }
+            
             response.paginationdetails.limit = request.limit;
             response.paginationdetails.offset = request.offset;
-            statusCode = 200
+            response.statusCode = 200
+            
         } else {
             
             if ( request.page != "" ) {
                 for ( i = 0, i < #newresponse.data, i++ ) {
                     if ( request.page == i) {
                         response.data[0].chunk = newresponse.data[i].chunk
+                        i = #newresponse.data
                     }
                 }
                 response.paginationdetails.page = int(request.page);
-                statusCode = 200
+                response.statusCode = 200
+                
             }
         }       
     }

@@ -184,15 +184,17 @@ Three SLA's are defined:
     \item Number of breached response times
 \end{itemize}
 
-The main service used for this example is the Calculator service, which provides the ability to make addition, substraction, multiply, and division. The pattern service is the SLA service, which provides metrics for the performance analytics of the service. When the client sends a request to the calculator service, the SLA service intercepts, starts a timer, and forwards the request. When the request comes back, it stops the timer \ref{lst:courierSLA}. 
+The main service used for this example is the Calculator service, which provides the ability to make addition, substraction, multiply, and division. The pattern service is the SLA service, which provides metrics for the performance analytics of the service. When the client sends a request to the calculator service, the SLA service intercepts, starts a timer, and forwards the request. When the request comes back, it stops the timer \ref{lst:courierSLA}, and . 
 
 \begin{lstlisting}[caption=Courier operations for the SLA service, 
-captionpos=b, language=java, label=courierSLA, frame=single]
-global.number_of_requests++; // Keeping track of every request
-getCurrentTimeMillis@Time(void)(start);
+captionpos=b, language=java, label=courierSLA, frame=single, breaklines=true]
+getCurrentTimeMillis@Time(void)(start); // Start Timer
 forward( request )( response );
-getCurrentTimeMillis@Time(void)(stop);
-sla_reporting // A function
+getCurrentTimeMillis@Time(void)(stop); // Stop timer
+responsetime = double(stop - start);
+// Call report funt
+buildReport@SLAStorageService( { .responsetime = responsetime } )( reportingResponse );
+response.report << reportingResponse
 \end{lstlisting}
 
 When the timer has stopped, the SLA analytics is calculated \ref{lst:slaOperation}. The values of the SLA's have been defined as global constants. On line 1, we find the difference between start and stop time. On line 2, we are executing a function, which returns the average response time of all stored response times. On line 5 we check whether the response time is not living up to the expectation, and increment the total breaches by 1. On line 9, we are checking the average response time, and on line 16 we are aggregating the SLA values into the response to the client. 
