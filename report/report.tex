@@ -348,9 +348,11 @@ If we set the Offset to 50 and Limit 50 3, we get the response as in \ref{lst:Pa
 }
 \end{lstlisting}
 
-
+One drawback of using Offset-Based is the scaling of documents. The farther you increase your Offset, the more intensive does the processing get, because you have to read through all documents up to the Offset index. An alternative to the Offset-Based approach is the Cursor-Based \cite{CursorBased:1}. Here you have a cursor pointing to an unique identifier, liking to the next identifier. The chosen meta-data value for the Cursor-Based has to be sequential. Have the linking provides a knowledge-mechanism of where to go next with little or none processing. This comes with a drawback: you cannot jump back to a previous page. 
 
 \section{Conclusion}
+
+Three Micoservice API Patterns have been shown to provide mechanisms to increase the quality of the services, and at the same time optimize how data is handled and transferred. The examples shows how Jolie is capable of utilizing these patterns and with minimal code. Because of the way Jolie's handles data structures, we can have one-to-one mappings between our types and requests/responses, and it eases up the implementations of Microservice API Patterns. The examples show one way of implementing the patterns, but depending on the use-case, the alternatives can be a better fit. 
 
 \newpage
 \bibliographystyle{plain}
