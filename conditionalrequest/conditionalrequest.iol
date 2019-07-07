@@ -1,8 +1,9 @@
 type CondReqRequestType: void {
-    .lastModified?: string
+    .ifModifiedSince?: string
 }
 type CondReqResponseType: void{
     .msg?: string
+    .statusCode: int
 }
 
 interface extender ConditionalRequestInterface_Extender {

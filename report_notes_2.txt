@@ -1,0 +1,42 @@
+SLA
+
+External service for the SLA metrics - Concurrent calls - used to store the SLA / SLO information. Set it as sequential
+
+        global.number_of_breaches++ - should be a service - storing information - get/set
+
+	calculateTheAvgFailedResponseTime - external service - modify to calls
+
+	Make the courier operations more generic. Use the interface extension instead of the specific operation.
+
+	Have a policy / monitoring mechanism of the measurements to shutdown the SLA service, if it breaches too many times
+
+
+	Two services: SLAGateway/Probe; Storage/PolicyService
+
+	SLAGateway - Observing the traffic and get the measurements from the PolicyService - Concurrent
+	PolicyService - The one that make the decision based on the storage. Sequential
+
+	Makes the system more flexible. And the Policy is global. 
+
+	Two kind of deployments: (1) one policyservice paired with one SLAgateway. No knowledge about each other. (2) one policyservice paired with multiple SLAGateways. Global knowledge. The building example. Think of the probe as a temperature sensor and the policy as a termostat. 
+
+Cond Req
+
+	Generic interface for the courier operation
+	Set the threshold as a constant (line 46)
+	You could use the same strategy as in the SLA but this is more simplified. 
+	The timezone is GMT - an assumption. 
+	Reference the RFC in the report: https://tools.ietf.org/html/rfc7232#section-2.2
+	ResponseType for the statuscode, so it is not tightly coupled with HTTP. 
+	In HTTP, the If-Modified-Since request header carries such timestamp and 
+	This pattern has multiple implementations and I am using the first one - TimeBased. Maybe describe how to modify to implement		second. Third one is too generic. https://microservice-api-patterns.org/patterns/quality/dataTransferParsimony/ConditionalRequest
+	Argument: a generic service with takes a condition of which implementation to use
+
+Pagination: 
+	Generic interface for the courier operation
+	i = #newresponse.data to break the loop line 47
+	ResponseType for the statuscode, so it is not tightly coupled with HTTP. 
+	Argument for the decision of copying instead of removing data in the response
+
+
+Keep it simple, but if you need more advance stuff, you got the posibility to do so. Explain how it can be done. 
