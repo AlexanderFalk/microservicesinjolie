@@ -1,2 +1,2 @@
-# microservicesinjolie
-Microservices Patterns in Jolie. A Calculator with SLA, Conditional Request, and Paggination
+# Microservices in Jolie
+Microservices are a standard to implement large-scale distributed systems. Experts have defined and documented a catalogue of Microservice API Patterns, which represent recurring problems. Those documents does not reference implementations and this is the starting point of this paper. The focus lies on three patterns: Service Level Agreement, Conditional Request, and Pagination, which helps with quality and optimization of microservices. We implement them using the native microservice language, Jolie, showing generic implementations of the patterns and commenting how Jolie supports them. 
