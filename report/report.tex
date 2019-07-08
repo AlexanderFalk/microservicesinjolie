@@ -128,15 +128,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Abstract}
-Microservices are surging through the IT industry, trying to accomodate the issues from Service-Oriented Architecture. The Microservice Architecture keeps an overview of the microservices, but it does not show how to implement recurring problems microservices comes with. Microservice API Patterns tries to help with this. In this paper the focus lies on three patterns: Service Level Agreement, Conditional Request, and Pagination, which helps with quality and optimization of microservices. We implement them using the native microservice language, Jolie, showing the ease of implementing patterns in Jolie and the advantages of doing so. 
+Microservices are surging through the IT industry, trying to accomodate the issues from Service-Oriented Architecture. The Microservice Architecture keeps an overview of the microservices, but it does not show how to implement recurring problems microservices comes with. Microservice API Patterns tries to help with this. In this paper the focus lies on three patterns: Service Level Agreement, Conditional Request, and Pagination, which helps with quality and optimization of microservices. We implement them using the native microservice language, Jolie, showing the ease of implementing patterns in the language and the advantages of doing so.
 
 \section{Disclaimer}
-It is assumed the reader is somewhat familiar with the concepts of Jolie Language. 
+It is assumed the reader is somewhat familiar with the concepts of Jolie Language. The complete implementations of the examples used in this paper can be found at https://github.com/AlexanderFalk/microservicesinjolie .
 
 \newpage
 
 \section{Introduction}
-Design Patterns are philosophy jargon for good practices within software development. The patterns mirrors reoccurring issues in real-world scenarios and tries to accomodate software developers reinventing the wheel. Through experience you build a repertoire of principles in the creation of software. These principles are called patterns \cite{Applying_Patterns}, which describes a problem with a solution attached, making it applicable in various contexts. A pattern advises -- and considers -- the forces and trade-offs for the solution. Design Patterns gained popularity after the release of the book "Design Patterns: Elements of Reusable Object\-Oriented Software" \cite{DesignPGoF}, written by the Gang-of-Four (referral to the four authors), which gave the insight into reusable templates for problems. Microservice API Patterns are an extensions to Design Patterns, primarily focusing on the communication between a client and a microservice. Lowering bandwidth, service agreements, structure, and API qualities, are some focus areas. \\
+Design Patterns are philosophy jargon for good practices within software development. The patterns mirrors recurring issues in real-world scenarios and tries to accomodate software developers reinventing the wheel. Through experience you build a repertoire of principles in the creation of software. These principles are called patterns \cite{Applying_Patterns}, which describes a problem with a solution attached, making it applicable in various contexts. A pattern advises -- and considers -- the forces and trade-offs for the solution. Design Patterns gained popularity after the release of the book "Design Patterns: Elements of Reusable Object\-Oriented Software" \cite{DesignPGoF}, written by the Gang-of-Four (referral to the four authors), which gave the insight into reusable templates for problems. Microservice API Patterns are an extensions to Design Patterns, primarily focusing on the communication between a client and a microservice. Lowering bandwidth, service agreements, structure, and quality are some of the focus areas. \\
 This paper focus' on three API patterns \cite{MAPIPweb}: 
 
 \begin{itemize}
@@ -145,14 +145,14 @@ This paper focus' on three API patterns \cite{MAPIPweb}:
     \item Pagination
 \end{itemize}
 
-The patterns are implemented in Jolie \cite{JolieAboutPage}, which is a native microservice programming language, focusing on services, distribution, and reusability. The last two are obtained by design. \\
-The goal is to show the patterns in play with Jolie and the ease of applying them. 
+The patterns are implemented in Jolie \cite{JolieAboutPage}, a native microservice programming language focusing on services, distribution, and reusability. The last two are obtained by design. \\
+The goal is to show the patterns in play with Jolie and the ease applying them. 
 
 \newpage
 
 \section{Patterns \& Implementations}
 
-There are five categories --- for now --- of  patterns: 
+There are five categories --- for now --- of microservice patterns: 
 
 \begin{itemize}
     \item Foundation Patterns - related to execution decisions of the API
@@ -164,7 +164,7 @@ There are five categories --- for now --- of  patterns:
 
 We are not diving into every category. The three chosen patterns are within the Quality and Structural categories. 
 
-In Jolie our examples have the same structure - like a template. There is a main service, providing the requested functionality by the client. It has an inputPort defined, deployed using the local medium \cite{LocalLoc}, using the shared memory for communicating between main service and the pattern serice. The pattern service functions as middleware, sitting infront, and aggregates the interface, of the main service, providing it with the ability of using the courier \cite{Courier} architecture to intercept the request and respond messages between the client and the main service. The pattern service embeds -- Listing \ref{lst:embedService} -- the main service, meaning, when the pattern service starts, it starts the main service as well. 
+In Jolie our examples have the same structure - like a template. There is a main service, providing the requested functionality by the client. It has an inputPort defined, deployed using the local medium \cite{LocalLoc}, using the shared memory for communicating between main service and the pattern service. The pattern service functions as middleware and aggregates the interfaces of the main service, providing it with the ability of using the courier \cite{Courier} architecture to intercept the request and respond messages between the client and the main service. The pattern service embeds -- Listing \ref{lst:embedService} -- the main service, meaning, when the pattern service starts, it starts the main service. 
 
 \begin{lstlisting}[caption=Embed main service into the pattern service, 
     captionpos=b, label={lst:embedService}, frame=single, breaklines=true, numbers=left, basicstyle=\scriptsize]
@@ -172,19 +172,19 @@ outputPort MainService {Interfaces: MainServiceInterface}
 embedded {Jolie: "<PATH_TO_MAIN_SERVICE>" in MainService}
 \end{lstlisting}
 
-The difference in the implementations are how the requests and responds are manipulated in the courier.
+The difference in the implementations are how the requests and responds are manipulated in the courier. The main service can be modified to run in a remote medium. This can be done by removing the embedding and changing the protocol. By doing so, the pattern services can utilize every available main services instead of the one coupled through embedding. Embedding is used because it eases up the development, knowing the main service starts when the pattern service starts. There is no deeper explanation of the design decision.
 
 \subsection{Quality Pattern: Service Level Agreement}
-A Service Level Agreement (SLA) \cite{SLA} is a contractual binding between a provider and one or more clients. SLA's defines the Quality-of-Service (QoS) \cite{QoS} characteristics through Service Level Objectives, ensuring clients are getting what they are paying for. A single SLA can be described as: Time-To-Respond (TTR). This is the time it takes for -- in our case -- the microservice to respond to requests. If an agreement from the provider was a response time within x seconds, and it breaches for more than y times per month, then a penalty has to be paid to the client. \\
+A Service Level Agreement (SLA) \cite{SLA} is a contractual binding between a provider and one or more clients. SLA's defines the Quality-of-Service (QoS) \cite{QoS} characteristics through Service Level Objectives (SLO), ensuring clients are getting what they are paying for. A single SLA can be described as: Time-To-Respond (TTR). This is the time it takes for -- in our case -- the microservice to respond to requests. If an agreement from the provider was a response time within x seconds, and it breaches for more than y times per month, then a penalty has to be paid to the client. \\
 
-Three SLA's are defined:
+Three SLA's have been defined for the purpose of the implementation:
 \begin{itemize}
     \item Response Time
     \item Average Response Time
     \item Number of breached response times
 \end{itemize}
 
-The main service used for this example is the Calculator service, which provides the ability to make addition, substraction, multiply, and division. The pattern service is the SLA service, which provides metrics for the performance analytics of the service. When the client sends a request to the calculator service, the SLA service intercepts, starts a timer, and forwards the request. When the request comes back, it stops the timer Listing \ref{lst:courierSLA}, and executes a request against the SLA Storage Service. This service handles everything related to the SLA conditions, functions, and storage. 
+The main service used for this example is a Calculator service, which provides the ability to make addition, substraction, multiply, and division. The pattern service is a SLA service and it has a sub-service called SLA Storage Service, providing metric analytics and persistent storage. When the client sends a request to the Calculator service, the SLA service intercepts, starts a timer, and forwards the request. When the request comes back, it stops the timer Listing \ref{lst:courierSLA}, and executes a request against the SLA Storage Service. This can be seen in Listing \ref{lst:courierSLA} from line 1-6:
 
 \begin{lstlisting}[caption=Courier operation for the SLA service, 
 captionpos=b, label={lst:courierSLA}, frame=single, breaklines=true, numbers=left, basicstyle=\scriptsize]
@@ -196,18 +196,18 @@ buildReport@SLAStorageService( { .responsetime = responsetime } )( reportingResp
 response.report << reportingResponse
 \end{lstlisting}
 
-The SLA Storage Service uses a JSON\-file as basic persistent storage and has three operations are defined:
+The SLA Storage Service uses a JSON\-file as basic persistent storage and has three operations defined:
 \begin{itemize}
-    \item buildReport - analyzes the response time of the calculation done for the client, checks for contractual breaches, and updates the JSON\-file
-    \item getReport - retrieving the information from the JSON\-file and returns the response to the client
-    \item reset - resets the file. Can be useful when shifting month
+    \item buildReport - analyzes the response time of the calculation done for the client, checks for contractual breaches, and updates the persistent storage
+    \item getReport - retrieving the information from the persistent storage and returns the response to the client
+    \item reset - resets the persistent storage. Can be useful when shifting month
 \end{itemize}
 
-The "buildReport" operation is called by the SLA Service, which provides the response time as a request parameter. The operation calls a function -- Listing \ref{lst:slaBuildReport} -- providing the logic behind the SLO's. On line 2 it opens and reads the persistent storage file, using the content of the file as a data structure for the lifespan of the function. On line 4 a function is called to calculate the average response time SLO. From line 6-19 it is checking if any SLO has been breached or if everything is fine. From line 20-27 it is updating the persistent storage file with the new information, and lastly returns the response back to the user. 
+The "buildReport" operation is called by the SLA Service, which provides the response time as a request parameter. The operation calls a function -- Listing \ref{lst:slaBuildReport} -- providing the logic behind the SLO's. On line 2 it opens and reads from the persistent storage, using the content of the file as a data structure for the lifespan of the function. On line 4 a function is called to calculate the average response time SLO. From line 6-19 it is checking if any SLO has been breached or if everything is fine. From line 20-28 it is updating the persistent storage file with the new information, and lastly returns the response back to the user. 
 
 \begin{lstlisting}[caption=Updates persistent storage file and checks for contractual breaches, captionpos=b, label={lst:slaBuildReport}, frame=single, breaklines=true, numbers=left, basicstyle=\scriptsize]
 define build_sla_reporting {
-    readFile@File( { .filename = STORAGE_FILENAME, .format = "json" } )( fileresponse );
+    readFile@File({ .filename = STORAGE_FILENAME, .format = "json" })(fileresponse);
     fileresponse.numberofrequests++;
     calculateTheAvgFailedResponseTime; // function to calculate the total average response time 
     fileresponse.avgresponsetime = avgsum
@@ -258,13 +258,13 @@ captionpos=b, language=json, label={lst:slaStorageResponse}, numbers=left]
 }
 \end{lstlisting}
 
-By building a "contract" into the microservice, the API provider implementing the SLA pattern establishes transparency between its clients. It can be on the whole API service or specific operations, but it outlines the terms for the client regards to quality. The downside of implementing the SLA pattern in the microservice is: the transparency makes it easier to be held accountable on the quality of the API. Now the agreement is "public" and in some cases you do not want this. It has been chosen to move the persistent storage to its own service instead of incomporating it into the SLA Service. The SLA Storage Service is running sequentially, which guarantees every client exclusive access to a resource, and data races can be minimized. By separating the persistent storage logic to its own service we also gain more loose coupling. Since the SLA is bound to the service, we can have a global perspective of the client satisfaction. One problem with this is if two clients are located in two distinct regions, and one client is satisfied, the second is not, but the SLA shows everything being fine. In this case you can apply use the SLA Storage Service and distribute it to be applicable based on regions. If the SLA Service goes down, the SLA Storage Service is not affected, which is important. 
+By building a "contract" into the microservice, the API provider implementing the SLA pattern establishes transparency between its clients. It can be on the whole API service or specific operations, but it outlines the terms for the client regards to quality. The downside of implementing the SLA pattern in the microservice is: the transparency makes it easier to be held accountable for the quality of the API. Now the agreement is public and in some cases you do not want this. It has been chosen to move the persistent storage to its own service instead of incomporating it into the SLA Service. The SLA Storage Service is running sequentially, which guarantees every client exclusive access to a resource, and data races can be minimized. By separating the persistent storage logic to its own service we also gain more loose coupling. Since the SLA is bound to the service, we can have a global perspective of the client satisfaction. One problem with this is if two clients are located in two distinct regions, and one client is satisfied, the second is not, but the SLA shows everything being fine. In this case you can use the SLA Storage Service and distribute it to be applicable based on regions. Also if the SLA Service goes down, the SLA Storage Service is not affected, which is important. 
 
 \subsection{Quality Pattern: Conditional Request}
 In some situations you have clients requesting the same data over and over again without changes. This increases the server-side processing time but also the bandwidth required to transfer data back and forth. The Conditional Request (CR) pattern tries to accomodate this problem by tracking client requests and if the request match a specified condition, then no data is returned. \\
 
-The Time-Based Conditional Request \cite{CondReqMAPI} is the approach chosen for the follow Jolie example, where the response header called: "Last-Modified" is used to show a timestamp, which can be used in subsequent requests. The setup is identical with the SLA example, except the main service is now a DataService microservice, which can respond with a chunk of random data. The first time the user creates a request towards the DataService microservice, we respond with the "Last-Modified" header. It is expected this header is used in the request header called: "If-Modified-Since" \cite{CondReqRFC} at the next request to calculate the difference and return the latest data if necessary. \\
-In the Listing \ref{lst:condreqCourier} on line 1 we are checking for existence of the "If-Modified-Since" request header. If it is defined, but it is empty, we are not making any checks, assuming the client got no data from earlier, responding with everything, and append the "Last-Modified" response header. From line 8-13 we get the "If-Modified-Since" header in the request, containing the clients current timestamp. On line 15-21 we execute the check if new data is needed for the client, and respond with the new data, otherwise no new data is needed. 
+The Time-Based Conditional Request \cite{CondReqMAPI} is the approach chosen for the follow Jolie example, where the response header called "Last-Modified" is used to show a timestamp, which can be used in subsequent requests. The setup is identical with the SLA example, except the main service is now a DataService microservice, which can respond with a chunk of random data. The first time the user creates a request towards the DataService microservice, we respond with the "Last-Modified" header. It is expected this header is used in the request header called "If-Modified-Since" \cite{CondReqRFC} at the next request to calculate the difference and return the latest data if necessary.\\
+In Listing \ref{lst:condreqCourier} at line 1 we are checking for existence of the "If-Modified-Since" request header. If it is defined, but empty, we are not making any checks, assuming the client got no data from earlier, responding with everything, and append the "Last-Modified" response header. From line 8-13 we get the "If-Modified-Since" header in the request, containing the clients current timestamp. On line 15-21 we execute the check if new data is needed for the client, and respond with the new data, otherwise no new data is needed. 
 
 \begin{lstlisting}[caption=Courier operations for the Conditional Request service, 
     captionpos=b, label={lst:condreqCourier}, frame=single, breaklines=true, numbers=left, basicstyle=\scriptsize]
@@ -292,18 +292,18 @@ if ( is_defined( request.("If-Modified-Since") ) ) {
 }
 \end{lstlisting}
 
-There are other alternatives to be used for the Conditional Request pattern. One of them is called: Fingerprint-Based Conditional Request \cite{CondReqRFC}, and is somewhat similiar to TimeBased. Fingerprint-Based generates a tag for the client, where to get this tag you can use a hash function on the response to generate a unique value. The tag becomes the unique value and is returned as a response to the client. From here it can be used as in TimeBased, where the client sends it along the request, and then a check can verify whether the response has changed from the last time. Since the Conditional Request Service for now is tightly coupled with the TimeBased approach, it could be an idea to abstract the checking functionality into a "Condition Service", where the client can specify which approach to use, giving more flexibility, and less coupling.\\
+There are other alternatives to be used for the Conditional Request pattern. One of them is called: Fingerprint-Based Conditional Request \cite{CondReqRFC}, and is somewhat similar to TimeBased. Fingerprint-Based generates a tag for the client, where to get this tag you can use a hash function on the response to generate a unique value. The tag becomes the unique value and is returned as a response to the client. From here it can be used as in TimeBased, where the client sends it along the request, and then a check can verify whether the response has changed from previous request. Since the Conditional Request Service for now is tightly coupled with the TimeBased approach, it could be an idea to abstract the checking functionality into a "Condition Service", where the client can specify which approach to use, giving more flexibility, and less coupling.\\
 
 \subsection{Structural Pattern: Pagination}
 In the Conditional Request pattern, we are checking whether it is necessary to respond with all data to renew the client-side. In some situations the client is not interested in getting all data but only a chunk of it. This is where the Pagination pattern \cite{PaginationMAPI} comes into the picture. Pagination is about cut-off of data and provide the client freedom to specify what data to retrieve. As in the Conditional Request pattern, we have multiple variants to choose from. In the Jolie example it is the Offset-Based Pagination which has been chosen. In this approach, we have three meta-data values: 
 
 \begin{itemize}
-    \item Offset - The number of documents to skip before start picking documents to return
+    \item Offset - The number of documents to skip and starting index
     \item Limit - The amount of documents to return
     \item Page - The total number of documents is broken into pages of a certain size. This specify which page to start on
 \end{itemize}
 
-If the Offset and Limit values have been defined in the request, we start by counting documents from the Offset and until the Limit, and then return the chunk of data as response to the client. If one of them are missing, and Page is defined, we start from the Page times the PAGE\_SIZE, which is a constant defined server-side. As an example if Page = 2 is defined, and PAGE\_SIZE = 25, our starting index is (Page - 1) * PAGE\_SIZE, and end index is PAGE\_SIZE * Page. With this approach, we can move to the next page of documents and not interfere with previous documents, avoiding duplications. We show this in Listing \ref{lst:paginationCourier}. From line 3-9, we check whether Offset and Limit are set. If they are, we respond with the documents within their defined ranged. Else from line 11-20, we check whether Page is defined, and proceed with above condition calculation.
+If the Offset and Limit values have been defined in the request, we start by counting documents from the Offset and until the Limit, and then return the chunk of data as response to the client. If one of them is missing, and Page is defined, we start from the Page times the PAGE\_SIZE, which is a constant defined server-side. As an example if Page = 2 is defined, and PAGE\_SIZE = 25, our starting index is (Page - 1) * PAGE\_SIZE, and end index is PAGE\_SIZE * Page. With this approach, we can move to the next page of documents and not interfere with previous documents, avoiding duplications. We show this in Listing \ref{lst:paginationCourier}. From line 3-9, we check whether Offset and Limit are set. If they are, we respond with the documents within their defined ranged. Else from line 11-20, we check whether Page is defined, and proceed with the Page calculation.
 \\
 \begin{lstlisting}[caption=Courier operations for the Pagination Service, 
     captionpos=b, label={lst:paginationCourier}, frame=single, breaklines=true, numbers=left, basicstyle=\scriptsize]
@@ -331,7 +331,7 @@ if ( request.offset != "" && request.limit != "" ) {
 }   
 \end{lstlisting}
 
-If we set the Offset to 50 and Limit 50 3, we get the response as in Listing \ref{lst:PaginationResponse}
+If we set the Offset to 50 and Limit 50 3, we get the response showed in Listing \ref{lst:PaginationResponse}
 
 \begin{lstlisting}[caption=The response to the client based on Offset and Limit meta-data, 
     captionpos=b, language=json, label={lst:PaginationResponse}, numbers=left]
@@ -348,11 +348,11 @@ If we set the Offset to 50 and Limit 50 3, we get the response as in Listing \re
 }
 \end{lstlisting}
 
-One drawback of using Offset-Based is the scaling of documents. The farther you increase your Offset, the more intensive does the processing get, because you have to read through all documents up to the Offset index. An alternative to the Offset-Based approach is the Cursor-Based \cite{CursorBased}. Here you have a cursor pointing to an unique identifier, liking to the next identifier. The chosen meta-data value for the Cursor-Based has to be sequential. Have the linking provides a knowledge-mechanism of where to go next with little or none processing. This comes with a drawback: you cannot jump back to a previous page. 
+One drawback of using Offset-Based is the scaling of documents. The farther you increase your Offset, the more intensive does the processing get, because you have to read through all documents up to the Offset index. An alternative to the Offset-Based approach is the Cursor-Based \cite{CursorBased}. Here you have a cursor pointing to an unique identifier, linking to the next identifier. The chosen meta-data value for the Cursor-Based has to be sequential. Having the linking provides a knowledge-mechanism of where to go next with little or none processing. This comes with a drawback: you cannot jump back to a previous page. As in Conditional Request, an idea can be to abstract the implementation details into a "AbstractPagination Service", giving the client the freedom to specify which implementation to use. 
 
 \section{Conclusion}
 
-Three Micoservice API Patterns have been shown to provide mechanisms to increase the quality of the services, and at the same time optimize how data is handled and transferred. The examples shows how Jolie is capable of utilizing these patterns with minimal code. Because of the way Jolie handles data structures, we can have one-to-one mappings between our types and requests/responses, and it eases up the implementations of Microservice API Patterns. The examples show one way of implementing the patterns, but depending on the use-case, the alternatives can be a better fit. 
+Three Micoservice API Patterns have been shown to provide mechanisms to increase the quality of the services, and at the same time optimize how data is handled and transferred. The examples shows how Jolie is capable of utilizing these patterns with minimal code. The way Jolie handles data structures, we can have one-to-one mappings between our types and requests/responses, and it eases up the implementations of Microservice API Patterns. In Jolie when you feel tightly coupled, one can create a new service quickly and gain loose coupling. This was done in the SLA Service implementation, where the persistent storage was moved into its own service. The examples show one way of implementing the patterns, but depending on the use-case, the alternatives can be better fit.
 
 \newpage
 \bibliographystyle{plain}
