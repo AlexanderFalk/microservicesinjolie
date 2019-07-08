@@ -211,14 +211,14 @@ define build_sla_reporting {
     fileresponse.numberofrequests++;
     calculateTheAvgFailedResponseTime; // function to calculate the total average response time 
     fileresponse.avgresponsetime = avgsum
-    if ( request.responsetime > SERVICE_LEVEL_OBJECTIVE_RESPONSE_TIME ) {
+    if ( request.responsetime > SL_OBJECTIVE_RESPONSE_TIME ) {
         fileresponse.numberofbreaches++;
         // Breach of response time SLO
-        if ( TotalNumberOfBreaches >= SERVICE_LEVEL_OBJECTIVE_NUMBER_OF_BREACH_RESPONSE_TIMES ) 
+        if ( TotalNumberOfBreaches >= SL_OBJECTIVE_NUMBER_OF_BREACH_RESPONSE_TIMES ) 
             // Breach of total number of breaches SLO
     } else {
         // Response time is fine
-        if(fileresponse.avgresponsetime < SERVICE_LEVEL_OBJECTIVE_AVG_RESPONSE_TIME) {
+        if(fileresponse.avgresponsetime < SL_OBJECTIVE_AVG_RESPONSE_TIME) {
             // No breach of the average response time
         } else {
             fileresponse.numberofbreaches++;
@@ -271,7 +271,7 @@ In the Listing \ref{lst:condreqCourier} on line 1 we are checking for existence 
 if ( is_defined( request.("If-Modified-Since") ) ) {
     length@StringUtils(request.("If-Modified-Since"))(headerLength);
     if ( headerLength <= 0) {
-        getCurrentDateTime@Time( {.format = "dd-MM-yyyy kk:mm:ss"} )( lastModified );
+        getCurrentDateTime@Time({.format = "dd-MM-yyyy kk:mm:ss"})(lastModified);
         forward( request )( response )
         response.statusCode = 200
     } else {
@@ -282,7 +282,7 @@ if ( is_defined( request.("If-Modified-Since") ) ) {
         currentTimestamp = currentTimestamp / 1000;
         // New data is returned
         if ( (currentTimestamp - timestampFromString) > MODIFIED_TIMESTAMP ) {
-            getCurrentDateTime@Time( {.format = "dd-MM-yyyy kk:mm:ss"} )( lastModified );
+            getCurrentDateTime@Time({.format = "dd-MM-yyyy kk:mm:ss"})(lastModified);
             forward( request )( response )
             response.statusCode = 200
         } else {
@@ -352,7 +352,7 @@ One drawback of using Offset-Based is the scaling of documents. The farther you 
 
 \section{Conclusion}
 
-Three Micoservice API Patterns have been shown to provide mechanisms to increase the quality of the services, and at the same time optimize how data is handled and transferred. The examples shows how Jolie is capable of utilizing these patterns and with minimal code. Because of the way Jolie's handles data structures, we can have one-to-one mappings between our types and requests/responses, and it eases up the implementations of Microservice API Patterns. The examples show one way of implementing the patterns, but depending on the use-case, the alternatives can be a better fit. 
+Three Micoservice API Patterns have been shown to provide mechanisms to increase the quality of the services, and at the same time optimize how data is handled and transferred. The examples shows how Jolie is capable of utilizing these patterns with minimal code. Because of the way Jolie handles data structures, we can have one-to-one mappings between our types and requests/responses, and it eases up the implementations of Microservice API Patterns. The examples show one way of implementing the patterns, but depending on the use-case, the alternatives can be a better fit. 
 
 \newpage
 \bibliographystyle{plain}
